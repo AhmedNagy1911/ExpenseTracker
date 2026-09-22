@@ -7,7 +7,7 @@ public static class EmailBodyBuilder
         var templatePath = Path.Combine(
             AppContext.BaseDirectory,
             "Templates",
-            $"{template}");
+            $"{template}.html");
 
         var body = File.ReadAllText(templatePath);
 
