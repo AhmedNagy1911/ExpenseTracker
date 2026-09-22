@@ -22,6 +22,10 @@
     <PackageReference Include="MimeKit" Version="4.18.1" />
   </ItemGroup>
 	
+	<ItemGroup>
+		<Content Include="Templates\**\*.html" Link="Templates\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
+	
   <ItemGroup>
     <ProjectReference Include="..\ExpenseTracker.Application\ExpenseTracker.Application.csproj" />
     <ProjectReference Include="..\ExpenseTracker.Domain\ExpenseTracker.Domain.csproj" />
