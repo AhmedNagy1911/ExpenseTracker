@@ -4,18 +4,21 @@ using ExpenseTracker.Infrastructure.Options;
 using ExpenseTracker.Infrastructure.Persistence;
 using ExpenseTracker.Infrastructure.Services;
 using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace ExpenseTracker.Infrastructure;
 
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services, IConfiguration config)
+       this IServiceCollection services, IConfiguration config)
     {
         // ── Database ──────────────────────────────────────────────────────────
         var connectionString = config.GetConnectionString("DefaultConnection") ??
@@ -23,10 +26,12 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
-        services.AddScoped<IJwtProvider, JwtProvider>();
 
+        services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<IEmailSender, EmailService>();
         services.AddScoped<IAuthService, AuthService>();
+        //services.AddScoped<IRoleService, RoleService>();
+        //services.AddScoped<IUserService, UserService>();
 
         //Add Options Pattern
         services.AddOptions<JwtOptions>()
@@ -48,6 +53,33 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>()
              .AddDefaultTokenProviders();
 
+        //Add JWT Configurations
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(o =>
+        {
+            o.SaveToken = true;
+            o.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings?.Key!)),
+                ValidIssuer = jwtSettings?.Issuer,
+                ValidAudience = jwtSettings?.Audience
+            };
+        });
+
+        services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequiredLength = 8;
+            options.SignIn.RequireConfirmedEmail = true;
+            options.User.RequireUniqueEmail = true;
+        });
 
         // Add Background Jobs Config (also used for Recurring Transactions + Daily Budget Check)
         services.AddHangfire(configuration => configuration
