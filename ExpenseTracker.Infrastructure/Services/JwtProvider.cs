@@ -11,6 +11,7 @@ namespace ExpenseTracker.Infrastructure.Services;
 
 public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
+    //strongly typed object
     private readonly JwtOptions _options = options.Value;
 
     public (string token, int expiresIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles)
@@ -24,7 +25,9 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
             new(nameof(roles), System.Text.Json.JsonSerializer.Serialize(roles), JsonClaimValueTypes.JsonArray)
         ];
 
+        //نعمل منه Security Key.
         var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
+        //استخدم الـ Security Key دي لتوقيع الـ JWT باستخدام HMAC-SHA256.
         var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
@@ -40,6 +43,10 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 
     public string? ValidateToken(string token)
     {
+        //ده object مسؤول عن:
+        // -قراءة JWT
+        //- كتابة JWT
+        // - Validation للـ JWT
         var tokenhandler = new JwtSecurityTokenHandler();
         var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
         try
