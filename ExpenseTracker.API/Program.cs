@@ -1,10 +1,10 @@
 using Asp.Versioning;
-using ExpenseTracker.API.Authorization;
 using ExpenseTracker.API.Exceptions;
 using ExpenseTracker.API.Swagger;
 using ExpenseTracker.Application;
 using ExpenseTracker.Infrastructure;
 using Hangfire;
+using HangfireBasicAuthenticationFilter;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;

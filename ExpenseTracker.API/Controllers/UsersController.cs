@@ -1,6 +1,7 @@
 ﻿using ExpenseTracker.API.Extensions;
 using ExpenseTracker.Application.Common.Consts;
 using ExpenseTracker.Application.Contracts.Users;
+using ExpenseTracker.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,13 @@ public class UsersController(IUserService userService) : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         return Ok(await _userService.GetAllAsync(cancellationToken));
+    }
+
+    [HttpGet("manage")]
+    [Authorize(Roles = DefaultRoles.Admin)]
+    public async Task<IActionResult> GetAllForManagement(CancellationToken cancellationToken)
+    {
+        return Ok(await _userService.GetAllForManagementAsync(cancellationToken));
     }
 
     [HttpGet("{id}")]
