@@ -36,7 +36,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.HasOne(x => x.RecurringTransaction)
             .WithMany(r => r.GeneratedTransactions)
             .HasForeignKey(x => x.RecurringTransactionId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.ClientSetNull);
 
         builder.HasIndex(x => new { x.UserId, x.Date });
     }
