@@ -1,4 +1,6 @@
-﻿namespace ExpenseTracker.Domain.Entities;
+﻿using ExpenseTracker.Domain.Enums;
+
+namespace ExpenseTracker.Domain.Entities;
 
 public class Notification
 {
