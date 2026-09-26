@@ -23,9 +23,6 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Restrict: avoids a second cascade path User -> Budget -> Notification
-        // on top of the direct User -> Notification cascade above (SQL Server forbids
-        // multiple cascade paths to the same table).
         builder.HasOne(x => x.Budget)
             .WithMany(b => b.Notifications)
             .HasForeignKey(x => x.BudgetId)
