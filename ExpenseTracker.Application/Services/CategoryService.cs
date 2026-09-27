@@ -1,4 +1,6 @@
 ﻿using ExpenseTracker.Application.Common;
+using ExpenseTracker.Application.Common.Errors;
+using ExpenseTracker.Application.Common.Results;
 using ExpenseTracker.Application.Contracts.Categories;
 using ExpenseTracker.Application.Interfaces;
 using ExpenseTracker.Domain.Enums;
@@ -18,4 +20,18 @@ public class CategoryService(IApplicationDbContext context) : ICategoryService
                 .OrderBy(x => x.Name)
                 .ProjectToType<CategoryResponse>()
                 .ToListAsync(cancellationToken);
+
+    public async Task<Result<CategoryResponse>> GetAsync(string userId, Guid id, CancellationToken cancellationToken = default)
+    {
+        var category = await _context.Categories
+                      .Where(x => x.UserId == userId && x.Id == id)
+                      .ProjectToType<CategoryResponse>()
+                      .SingleOrDefaultAsync(cancellationToken);
+
+        if (category is null)
+            return Result.Failure<CategoryResponse>(CategoryErrors.CategoryNotFound);
+
+        return Result.Success(category);
+    }
+
 }
