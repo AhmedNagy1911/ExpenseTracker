@@ -21,7 +21,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         // A user shouldn't have two categories with the same name and type.
         builder.HasIndex(x => new { x.UserId, x.Name, x.Type }).IsUnique();
 
-        builder.HasOne<Domain.Entities.ApplicationUser>()
+        builder.HasOne<ApplicationUser>()
             .WithMany()
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);

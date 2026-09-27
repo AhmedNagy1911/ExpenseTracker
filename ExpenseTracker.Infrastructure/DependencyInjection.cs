@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Application.Interfaces;
+﻿using ExpenseTracker.Application.Common;
+using ExpenseTracker.Application.Interfaces;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Infrastructure.Options;
 using ExpenseTracker.Infrastructure.Persistence;
@@ -32,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 
         //Add Options Pattern
         services.AddOptions<JwtOptions>()

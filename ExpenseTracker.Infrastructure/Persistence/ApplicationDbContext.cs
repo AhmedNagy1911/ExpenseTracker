@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Domain.Entities;
+﻿using ExpenseTracker.Application.Common;
+using ExpenseTracker.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -6,7 +7,7 @@ using System.Reflection;
 namespace ExpenseTracker.Infrastructure.Persistence;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
+    : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options), IApplicationDbContext
 {
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Transaction> Transactions => Set<Transaction>();

@@ -1,3 +1,5 @@
+using ExpenseTracker.Application.Interfaces;
+using ExpenseTracker.Application.Services;
 using FluentValidation;
 using Mapster;
 using MapsterMapper;
@@ -21,6 +23,9 @@ public static class DependencyInjection
         services
             .AddFluentValidationAutoValidation()
             .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        services.AddScoped<ICategoryService, CategoryService>();
+
         return services;
     }
 }
