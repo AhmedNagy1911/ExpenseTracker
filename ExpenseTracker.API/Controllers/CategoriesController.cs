@@ -41,4 +41,11 @@ public class CategoriesController(ICategoryService categoryService) : Controller
             : result.ToProblem();
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CategoryRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _categoryService.UpdateAsync(UserId, id, request, cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
 }

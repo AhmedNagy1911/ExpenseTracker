@@ -56,4 +56,25 @@ public class CategoryService(IApplicationDbContext context) : ICategoryService
         return Result.Success(category.Adapt<CategoryResponse>());
 
     }
+    public async Task<Result> UpdateAsync(string userId, Guid id, CategoryRequest request, CancellationToken cancellationToken = default)
+    {
+        var category = await _context.Categories
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == id, cancellationToken);
+
+        if (category is null)
+            return Result.Failure(CategoryErrors.CategoryNotFound);
+
+        var isDuplicated = await _context.Categories
+            .AnyAsync(x => x.UserId == userId && x.Name == request.Name && x.Type == request.Type && x.Id != id, cancellationToken);
+
+        if (isDuplicated)
+            return Result.Failure(CategoryErrors.DuplicatedCategory);
+
+        category.Name = request.Name;
+        category.Type = request.Type;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
 }
