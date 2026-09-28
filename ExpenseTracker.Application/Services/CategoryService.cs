@@ -3,6 +3,7 @@ using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Results;
 using ExpenseTracker.Application.Contracts.Categories;
 using ExpenseTracker.Application.Interfaces;
+using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Enums;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -34,4 +35,25 @@ public class CategoryService(IApplicationDbContext context) : ICategoryService
         return Result.Success(category);
     }
 
+    public async Task<Result<CategoryResponse>> AddAsync(string userId, CategoryRequest request, CancellationToken cancellationToken = default)
+    {
+        var isDuplicated = await _context.Categories
+            .AnyAsync(x => x.UserId == userId && x.Name == request.Name && x.Type == request.Type, cancellationToken);
+
+        if (isDuplicated)
+            return Result.Failure<CategoryResponse>(CategoryErrors.DuplicatedCategory);
+
+        var category = new Category
+        {
+            UserId = userId,
+            Name = request.Name,
+            Type = request.Type
+        };
+
+        await _context.Categories.AddAsync(category, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(category.Adapt<CategoryResponse>());
+
+    }
 }

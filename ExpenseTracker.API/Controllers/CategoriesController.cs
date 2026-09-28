@@ -1,4 +1,5 @@
 ﻿using ExpenseTracker.API.Extensions;
+using ExpenseTracker.Application.Contracts.Categories;
 using ExpenseTracker.Application.Interfaces;
 using ExpenseTracker.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +29,16 @@ public class CategoriesController(ICategoryService categoryService) : Controller
     {
         var result = await _categoryService.GetAsync(UserId, id, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    [HttpPost("")]
+    public async Task<IActionResult> Add([FromBody] CategoryRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _categoryService.AddAsync(UserId, request, cancellationToken);
+
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value)
+            : result.ToProblem();
     }
 
 }
