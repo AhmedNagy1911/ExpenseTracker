@@ -77,4 +77,26 @@ public class CategoryService(IApplicationDbContext context) : ICategoryService
 
         return Result.Success();
     }
+
+    public async Task<Result> DeleteAsync(string userId, Guid id, CancellationToken cancellationToken = default)
+    {
+        var category = await _context.Categories
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == id, cancellationToken);
+
+        if (category is null)
+            return Result.Failure(CategoryErrors.CategoryNotFound);
+
+        var isInUse = await _context.Transactions.AnyAsync(x => x.CategoryId == id, cancellationToken)
+            || await _context.RecurringTransactions.AnyAsync(x => x.CategoryId == id, cancellationToken)
+            || await _context.Budgets.AnyAsync(x => x.CategoryId == id, cancellationToken);
+
+        if (isInUse)
+            return Result.Failure(CategoryErrors.CategoryInUse);
+
+        _context.Categories.Remove(category);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
 }

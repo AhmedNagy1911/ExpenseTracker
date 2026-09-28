@@ -48,4 +48,11 @@ public class CategoriesController(ICategoryService categoryService) : Controller
 
         return result.IsSuccess ? NoContent() : result.ToProblem();
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _categoryService.DeleteAsync(UserId, id, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
 }
