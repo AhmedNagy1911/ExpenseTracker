@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Application.Contracts.Transactions;
+﻿using ExpenseTracker.API.Extensions;
+using ExpenseTracker.Application.Contracts.Transactions;
 using ExpenseTracker.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,4 +22,13 @@ public class TransactionsController(ITransactionService transactionService) : Co
         var transactions = await _transactionService.GetAllAsync(UserId, filters, cancellationToken);
         return Ok(transactions);
     }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _transactionService.GetAsync(UserId, id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+
 }

@@ -1,5 +1,7 @@
 ﻿using ExpenseTracker.Application.Common;
+using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Models;
+using ExpenseTracker.Application.Common.Results;
 using ExpenseTracker.Application.Contracts.Transactions;
 using ExpenseTracker.Application.Interfaces;
 using ExpenseTracker.Domain.Entities;
@@ -61,6 +63,19 @@ public class TransactionService(IApplicationDbContext context) : ITransactionSer
             filters.PageNumber,
             filters.PageSize,
             cancellationToken);
+    }
+
+    public async Task<Result<TransactionResponse>> GetAsync(string userId, Guid id, CancellationToken cancellationToken = default)
+    {
+        var transaction = await _context.Transactions
+            .AsNoTracking()
+            .Where(x => x.UserId == userId && x.Id == id)
+            .ProjectToType<TransactionResponse>()
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return transaction is null
+            ? Result.Failure<TransactionResponse>(TransactionErrors.TransactionNotFound)
+            : Result.Success(transaction);
     }
 
     private static IQueryable<Transaction> ApplySorting(IQueryable<Transaction> query, TransactionFilters filters)
