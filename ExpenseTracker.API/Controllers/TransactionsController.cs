@@ -30,5 +30,14 @@ public class TransactionsController(ITransactionService transactionService) : Co
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
+    [HttpPost("")]
+    public async Task<IActionResult> Add([FromBody] TransactionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _transactionService.AddAsync(UserId, request, cancellationToken);
+
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value)
+            : result.ToProblem();
+    }
 
 }

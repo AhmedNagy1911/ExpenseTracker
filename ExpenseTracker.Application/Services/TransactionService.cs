@@ -77,7 +77,35 @@ public class TransactionService(IApplicationDbContext context) : ITransactionSer
             ? Result.Failure<TransactionResponse>(TransactionErrors.TransactionNotFound)
             : Result.Success(transaction);
     }
+    public async Task<Result<TransactionResponse>> AddAsync(string userId, TransactionRequest request, CancellationToken cancellationToken = default)
+    {
+        // الـ Category لازم تكون بتاعة نفس اليوزر
+        var category = await _context.Categories
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == request.CategoryId, cancellationToken);
 
+        if (category is null)
+            return Result.Failure<TransactionResponse>(CategoryErrors.CategoryNotFound);
+
+        var transaction = new Transaction
+        {
+            UserId = userId,
+            CategoryId = category.Id,
+            Type = category.Type,          // النوع متاخد من الـ Category
+            Amount = request.Amount,
+            Date = request.Date,
+            Description = request.Description
+        };
+
+        await _context.Transactions.AddAsync(transaction, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var response = new TransactionResponse(
+            transaction.Id, category.Id, category.Name, transaction.Amount, transaction.Type,
+            transaction.Description, transaction.Date, transaction.RecurringTransactionId, transaction.CreatedAt);
+
+        return Result.Success(response);
+    }
     private static IQueryable<Transaction> ApplySorting(IQueryable<Transaction> query, TransactionFilters filters)
     {
         // Default: الأحدث الأول. Id (Guid v7) كـ tie-breaker عشان الـ Pagination يبقى ثابت
