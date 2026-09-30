@@ -106,6 +106,38 @@ public class TransactionService(IApplicationDbContext context) : ITransactionSer
 
         return Result.Success(response);
     }
+
+    public async Task<Result> UpdateAsync(string userId, Guid id, TransactionRequest request, CancellationToken cancellationToken = default)
+    {
+        var transaction = await _context.Transactions
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == id, cancellationToken);
+
+        if (transaction is null)
+            return Result.Failure(TransactionErrors.TransactionNotFound);
+
+        var category = await _context.Categories
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == request.CategoryId, cancellationToken);
+
+        if (category is null)
+            return Result.Failure(CategoryErrors.CategoryNotFound);
+
+        transaction.CategoryId = category.Id;
+        transaction.Type = category.Type;
+        transaction.Amount = request.Amount;
+        transaction.Date = request.Date;
+        transaction.Description = request.Description;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public Task<Result> DeleteAsync(string userId, Guid id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     private static IQueryable<Transaction> ApplySorting(IQueryable<Transaction> query, TransactionFilters filters)
     {
         // Default: الأحدث الأول. Id (Guid v7) كـ tie-breaker عشان الـ Pagination يبقى ثابت
