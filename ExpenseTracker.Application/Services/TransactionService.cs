@@ -133,9 +133,18 @@ public class TransactionService(IApplicationDbContext context) : ITransactionSer
         return Result.Success();
     }
 
-    public Task<Result> DeleteAsync(string userId, Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteAsync(string userId, Guid id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var transaction = await _context.Transactions
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == id, cancellationToken);
+
+        if (transaction is null)
+            return Result.Failure(TransactionErrors.TransactionNotFound);
+
+        _context.Transactions.Remove(transaction);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 
     private static IQueryable<Transaction> ApplySorting(IQueryable<Transaction> query, TransactionFilters filters)

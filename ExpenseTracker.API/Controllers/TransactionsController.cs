@@ -46,4 +46,11 @@ public class TransactionsController(ITransactionService transactionService) : Co
         var result = await _transactionService.UpdateAsync(UserId, id, request, cancellationToken);
         return result.IsSuccess ? NoContent() : result.ToProblem();
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _transactionService.DeleteAsync(UserId, id, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
 }
