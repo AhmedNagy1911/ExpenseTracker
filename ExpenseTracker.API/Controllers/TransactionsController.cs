@@ -40,4 +40,10 @@ public class TransactionsController(ITransactionService transactionService) : Co
             : result.ToProblem();
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] TransactionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _transactionService.UpdateAsync(UserId, id, request, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
 }
