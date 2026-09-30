@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Application.Contracts.RecurringTransactions;
+﻿using ExpenseTracker.API.Extensions;
+using ExpenseTracker.Application.Contracts.RecurringTransactions;
 using ExpenseTracker.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,5 +23,11 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         return Ok(recurringTransactions);
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _recurringTransactionService.GetAsync(UserId, id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
 
 }

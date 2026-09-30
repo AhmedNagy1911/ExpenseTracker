@@ -1,5 +1,7 @@
 ﻿using ExpenseTracker.Application.Common;
+using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Models;
+using ExpenseTracker.Application.Common.Results;
 using ExpenseTracker.Application.Contracts.RecurringTransactions;
 using ExpenseTracker.Application.Interfaces;
 using ExpenseTracker.Domain.Entities;
@@ -53,6 +55,18 @@ public class RecurringTransactionService(IApplicationDbContext context) : IRecur
             cancellationToken);
     }
 
+    public async Task<Result<RecurringTransactionResponse>> GetAsync(string userId, Guid id, CancellationToken cancellationToken = default)
+    {
+        var recurring = await _context.RecurringTransactions
+            .AsNoTracking()
+            .Where(x => x.UserId == userId && x.Id == id)
+            .ProjectToType<RecurringTransactionResponse>()
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return recurring is null
+            ? Result.Failure<RecurringTransactionResponse>(RecurringTransactionErrors.NotFound)
+            : Result.Success(recurring);
+    }
 
     private static IQueryable<RecurringTransaction> ApplySorting(IQueryable<RecurringTransaction> query, RecurringTransactionFilters filters)
     {
