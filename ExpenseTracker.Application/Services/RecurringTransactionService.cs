@@ -68,6 +68,92 @@ public class RecurringTransactionService(IApplicationDbContext context) : IRecur
             : Result.Success(recurring);
     }
 
+    public async Task<Result<RecurringTransactionResponse>> AddAsync(string userId, RecurringTransactionRequest request, CancellationToken cancellationToken = default)
+    {
+        var category = await _context.Categories
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == request.CategoryId, cancellationToken);
+
+        if (category is null)
+            return Result.Failure<RecurringTransactionResponse>(CategoryErrors.CategoryNotFound);
+
+        var recurring = new RecurringTransaction
+        {
+            UserId = userId,
+            CategoryId = category.Id,
+            Type = category.Type,
+            Amount = request.Amount,
+            Description = request.Description,
+            StartDate = request.StartDate.Date,
+            NextRunDate = request.StartDate.Date,
+            IsActive = true
+        };
+
+        await _context.RecurringTransactions.AddAsync(recurring, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var response = new RecurringTransactionResponse(
+            recurring.Id, category.Id, category.Name, recurring.Amount, recurring.Type,
+            recurring.Description, recurring.Frequency, recurring.StartDate, recurring.NextRunDate, recurring.IsActive);
+
+        return Result.Success(response);
+    }
+
+    public async Task<Result> UpdateAsync(string userId, Guid id, RecurringTransactionRequest request, CancellationToken cancellationToken = default)
+    {
+        var recurring = await _context.RecurringTransactions
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == id, cancellationToken);
+
+        if (recurring is null)
+            return Result.Failure(RecurringTransactionErrors.NotFound);
+
+        var category = await _context.Categories
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == request.CategoryId, cancellationToken);
+
+        if (category is null)
+            return Result.Failure(CategoryErrors.CategoryNotFound);
+
+        recurring.CategoryId = category.Id;
+        recurring.Type = category.Type;
+        recurring.Amount = request.Amount;
+        recurring.Description = request.Description;
+
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ToggleStatusAsync(string userId, Guid id, CancellationToken cancellationToken = default)
+    {
+        var recurring = await _context.RecurringTransactions
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == id, cancellationToken);
+
+        if (recurring is null)
+            return Result.Failure(RecurringTransactionErrors.NotFound);
+
+        recurring.IsActive = !recurring.IsActive;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> DeleteAsync(string userId, Guid id, CancellationToken cancellationToken = default)
+    {
+        var recurring = await _context.RecurringTransactions
+            .SingleOrDefaultAsync(x => x.UserId == userId && x.Id == id, cancellationToken);
+
+        if (recurring is null)
+            return Result.Failure(RecurringTransactionErrors.NotFound);
+
+        _context.RecurringTransactions.Remove(recurring);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
     private static IQueryable<RecurringTransaction> ApplySorting(IQueryable<RecurringTransaction> query, RecurringTransactionFilters filters)
     {
         if (string.IsNullOrWhiteSpace(filters.SortColumn) ||
