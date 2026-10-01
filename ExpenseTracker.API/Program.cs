@@ -3,6 +3,7 @@ using ExpenseTracker.API.Exceptions;
 using ExpenseTracker.API.Swagger;
 using ExpenseTracker.Application;
 using ExpenseTracker.Infrastructure;
+using ExpenseTracker.Infrastructure.Jobs;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.Extensions.Options;
@@ -100,6 +101,11 @@ app.UseHangfireDashboard("/jobs", new DashboardOptions
     ],
     DashboardTitle = "Expense Tracker Dashboard",
 });
+
+RecurringJob.AddOrUpdate<IRecurringTransactionJob>(
+    "generate-recurring-transactions",
+    job => job.ExecuteAsync(CancellationToken.None),
+    Cron.Daily);
 
 app.UseAuthentication();
 app.UseAuthorization();
