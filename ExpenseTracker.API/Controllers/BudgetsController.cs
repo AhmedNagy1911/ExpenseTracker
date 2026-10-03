@@ -30,5 +30,27 @@ public class BudgetsController(IBudgetService budgetService) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
+    [HttpPost("")]
+    public async Task<IActionResult> Add([FromBody] BudgetRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _budgetService.AddAsync(UserId, request, cancellationToken);
 
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value)
+            : result.ToProblem();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] BudgetRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _budgetService.UpdateAsync(UserId, id, request, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _budgetService.DeleteAsync(UserId, id, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
 }
