@@ -106,6 +106,10 @@ RecurringJob.AddOrUpdate<IRecurringTransactionJob>(
     "generate-recurring-transactions",
     job => job.ExecuteAsync(CancellationToken.None),
     Cron.Daily);
+RecurringJob.AddOrUpdate<IBudgetCheckJob>
+    ("check-budgets",
+    j => j.ExecuteAsync(CancellationToken.None
+    ), "0 1 * * *");           // 01:00
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Alert</title>
+</head>
+<body style="margin:0; padding:0; background-color:#F3F5F0; font-family:-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F3F5F0; padding:32px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF; border-radius:8px; overflow:hidden; border:1px solid #DCE2D8;">
+
+                    <tr>
+                        <td style="background-color:{{headerColor}}; padding:24px 32px;">
+                            <span style="color:#FFFFFF; font-size:13px; letter-spacing:.04em; text-transform:uppercase; font-weight:600;">
+                                Expense &amp; Budget Tracker
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:32px;">
+                            <h1 style="margin:0 0 4px; font-size:20px; color:#1B211D;">{{title}}</h1>
+                            <p style="margin:0 0 20px; font-size:13px; color:#5B665C;">Hi {{name}},</p>
+
+                            <p style="margin:0 0 24px; font-size:15px; line-height:1.6; color:#1B211D;">
+                                {{message}}
+                            </p>
+
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F4EF; border-radius:6px; margin-bottom:24px;">
+                                <tr>
+                                    <td style="padding:16px 20px; font-size:13px; color:#5B665C;">
+                                        <strong style="color:#1B211D;">Category:</strong> {{categoryName}}<br>
+                                        <strong style="color:#1B211D;">Budget:</strong> {{budgetAmount}} EGP<br>
+                                        <strong style="color:#1B211D;">Spent so far:</strong> {{spentAmount}} EGP
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <a href="{{appUrl}}" style="display:inline-block; background-color:#0B6E4F; color:#FFFFFF; text-decoration:none; font-size:14px; font-weight:600; padding:12px 24px; border-radius:6px;">
+                                View Budget
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:20px 32px; border-top:1px solid #EEF1EC;">
+                            <p style="margin:0; font-size:12px; color:#8DA396;">
+                                You're receiving this because you have an active budget on Expense &amp; Budget Tracker.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
