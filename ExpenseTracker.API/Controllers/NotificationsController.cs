@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Application.Contracts.Notifications;
+﻿using ExpenseTracker.API.Extensions;
+using ExpenseTracker.Application.Contracts.Notifications;
 using ExpenseTracker.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,5 +30,18 @@ public class NotificationsController(INotificationService notificationService) :
         return Ok(new { count });
     }
 
+    [HttpPut("{id}/read")]
+    public async Task<IActionResult> MarkAsRead([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _notificationService.MarkAsReadAsync(UserId, id, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
+
+    [HttpPut("read-all")]
+    public async Task<IActionResult> MarkAllAsRead(CancellationToken cancellationToken)
+    {
+        var result = await _notificationService.MarkAllAsReadAsync(UserId, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+    }
 
 }
