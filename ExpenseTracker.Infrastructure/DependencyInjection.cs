@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
         services.AddScoped<IRecurringTransactionJob, RecurringTransactionJob>();
+        services.AddScoped<IBudgetCheckJob, BudgetCheckJob>();
 
         //Add Options Pattern
         services.AddOptions<JwtOptions>()
