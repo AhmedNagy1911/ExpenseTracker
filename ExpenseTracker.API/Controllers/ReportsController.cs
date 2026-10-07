@@ -25,4 +25,15 @@ public class ReportsController(IReportService reportService) : ControllerBase
     }
 
 
+    [HttpGet("category-breakdown")]
+    public async Task<IActionResult> GetCategoryBreakdown([FromQuery] int year, [FromQuery] int month, CancellationToken cancellationToken)
+    {
+        if (month is < 1 or > 12)
+            return BadRequest("Month must be between 1 and 12.");
+
+        var breakdown = await _reportService.GetCategoryBreakdownAsync(UserId, year, month, cancellationToken);
+        return Ok(breakdown);
+    }
+
+
 }

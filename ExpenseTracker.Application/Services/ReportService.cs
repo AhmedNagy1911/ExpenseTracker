@@ -26,6 +26,38 @@ public class ReportService(IApplicationDbContext context) : IReportService
         return new MonthlySummaryResponse(year, month, income, expenses, income - expenses);
     }
 
+    public async Task<IEnumerable<CategoryBreakdownResponse>> GetCategoryBreakdownAsync(string userId, int year, int month, CancellationToken cancellationToken = default)
+    {
+        var (start, end) = GetPeriod(year, month);
+
+        return await (
+            from transaction in _context.Transactions
+            join category in _context.Categories
+                on transaction.CategoryId equals category.Id
+            where transaction.UserId == userId
+                  && transaction.Type == TransactionType.Expense
+                  && transaction.Date >= start
+                  && transaction.Date < end
+            group transaction by new
+            {
+                transaction.CategoryId,
+                CategoryName = category.Name
+            }
+            into g
+            select new
+            {
+                g.Key.CategoryId,
+                g.Key.CategoryName,
+                Amount = g.Sum(x => x.Amount)
+            }
+        )
+        .OrderByDescending(x => x.Amount)
+        .Select(x => new CategoryBreakdownResponse(
+            x.CategoryId,
+            x.CategoryName,
+            x.Amount))
+        .ToListAsync(cancellationToken);
+    }
 
 
     private static (DateTime Start, DateTime End) GetPeriod(int year, int month)
