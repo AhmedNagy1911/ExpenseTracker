@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IRecurringTransactionService, RecurringTransactionService>();
         services.AddScoped<IBudgetService, BudgetService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IReportService, ReportService>();
 
         return services;
     }
