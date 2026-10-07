@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Application.Interfaces;
+﻿using ExpenseTracker.Application.Contracts.Reports;
+using ExpenseTracker.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -33,6 +34,14 @@ public class ReportsController(IReportService reportService) : ControllerBase
 
         var breakdown = await _reportService.GetCategoryBreakdownAsync(UserId, year, month, cancellationToken);
         return Ok(breakdown);
+    }
+
+
+    [HttpGet("month-comparison")]
+    public async Task<IActionResult> GetMonthComparison([FromQuery] MonthComparisonFilters filters, CancellationToken cancellationToken)
+    {
+        var comparison = await _reportService.GetMonthComparisonAsync(UserId, filters, cancellationToken);
+        return Ok(comparison);
     }
 
 
