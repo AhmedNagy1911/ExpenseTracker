@@ -148,6 +148,10 @@ public class RecurringTransactionService(IApplicationDbContext context) : IRecur
         if (recurring is null)
             return Result.Failure(RecurringTransactionErrors.NotFound);
 
+        await _context.Transactions
+       .Where(t => t.RecurringTransactionId == id)
+       .ExecuteUpdateAsync(s => s.SetProperty(t => t.RecurringTransactionId, (Guid?)null), cancellationToken);
+
         _context.RecurringTransactions.Remove(recurring);
         await _context.SaveChangesAsync(cancellationToken);
 
