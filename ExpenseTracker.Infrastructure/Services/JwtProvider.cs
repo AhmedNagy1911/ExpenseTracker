@@ -57,6 +57,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
                 ValidateIssuerSigningKey = true,
                 ValidateIssuer = false,
                 ValidateAudience = false,
+                ValidateLifetime = false,
                 ClockSkew = TimeSpan.Zero
             }, out SecurityToken validatedToken);
 

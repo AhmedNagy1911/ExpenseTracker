@@ -12,4 +12,7 @@ public record CategoryErrors
 
     public static readonly Error CategoryInUse =
         new("Category.CategoryInUse", "Cannot delete this category because it has related transactions, recurring transactions or budgets", StatusCodes.Status409Conflict);
+
+    public static readonly Error CategoryTypeLocked =
+        new("Category.CategoryTypeLocked", "Cannot change the type of a category that has related transactions, recurring transactions or budgets", StatusCodes.Status409Conflict);
 }

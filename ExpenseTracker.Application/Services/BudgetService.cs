@@ -137,8 +137,11 @@ public class BudgetService(IApplicationDbContext context) : IBudgetService
         if (budget is null)
             return Result.Failure(BudgetErrors.BudgetNotFound);
 
-        // Restrict على Notifications.BudgetId — لو فيه Notifications مرتبطة، الحذف هيفشل على مستوى الـ DB.
-        // ممكن تحب تمسح الـ Notifications المرتبطة الأول، أو تغيّرها لـ Cascade لو مش مهتم بتاريخها.
+
+        await _context.Notifications
+            .Where(n => n.BudgetId == id)
+            .ExecuteDeleteAsync(cancellationToken);
+
         _context.Budgets.Remove(budget);
         await _context.SaveChangesAsync(cancellationToken);
 

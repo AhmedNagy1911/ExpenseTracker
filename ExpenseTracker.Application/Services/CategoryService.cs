@@ -70,6 +70,17 @@ public class CategoryService(IApplicationDbContext context) : ICategoryService
         if (isDuplicated)
             return Result.Failure(CategoryErrors.DuplicatedCategory);
 
+        if (category.Type != request.Type)
+        {
+            var isInUse = await _context.Transactions.AnyAsync(x => x.CategoryId == id, cancellationToken)
+                || await _context.RecurringTransactions.AnyAsync(x => x.CategoryId == id, cancellationToken)
+                || await _context.Budgets.AnyAsync(x => x.CategoryId == id, cancellationToken);
+
+            if (isInUse)
+                return Result.Failure(CategoryErrors.CategoryTypeLocked);
+        }
+
+
         category.Name = request.Name;
         category.Type = request.Type;
 

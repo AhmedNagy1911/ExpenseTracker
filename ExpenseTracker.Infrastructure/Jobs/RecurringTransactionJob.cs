@@ -44,6 +44,9 @@ public class RecurringTransactionJob(ApplicationDbContext context, ILogger<Recur
                 await _context.Transactions.AddAsync(transaction, cancellationToken);
                 generatedCount++;
 
+                var monthsElapsed = ((recurring.NextRunDate.Year - recurring.StartDate.Year) * 12)
+                         + (recurring.NextRunDate.Month - recurring.StartDate.Month);
+
                 recurring.NextRunDate = recurring.Frequency switch
                 {
                     Domain.Enums.RecurringFrequency.Monthly => recurring.NextRunDate.AddMonths(1),
