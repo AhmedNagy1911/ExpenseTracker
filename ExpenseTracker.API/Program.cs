@@ -1,11 +1,14 @@
 using Asp.Versioning;
 using ExpenseTracker.API.Exceptions;
+using ExpenseTracker.API.Hubs;
 using ExpenseTracker.API.Swagger;
 using ExpenseTracker.Application;
+using ExpenseTracker.Application.Interfaces;
 using ExpenseTracker.Infrastructure;
 using ExpenseTracker.Infrastructure.Jobs;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -20,6 +23,12 @@ builder.Services.AddControllers();
 builder.Services
         .AddInfrastructure(builder.Configuration)
         .AddApplication();
+
+
+// SignalR
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, SubUserIdProvider>();
+builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 
 // Exception Handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
