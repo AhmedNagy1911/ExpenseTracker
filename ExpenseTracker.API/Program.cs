@@ -1,11 +1,14 @@
 using Asp.Versioning;
 using ExpenseTracker.API.Exceptions;
+using ExpenseTracker.API.Hubs;
 using ExpenseTracker.API.Swagger;
 using ExpenseTracker.Application;
+using ExpenseTracker.Application.Interfaces;
 using ExpenseTracker.Infrastructure;
 using ExpenseTracker.Infrastructure.Jobs;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -20,6 +23,12 @@ builder.Services.AddControllers();
 builder.Services
         .AddInfrastructure(builder.Configuration)
         .AddApplication();
+
+
+// SignalR
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, SubUserIdProvider>();
+builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 
 // Exception Handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -52,15 +61,15 @@ builder.Services.AddApiVersioning(options =>
 });
 
 // CORS
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
-    {
-        builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+    options.AddDefaultPolicy(policy => policy
+        .WithOrigins(allowedOrigins)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials());
 });
 
 // Configure application logging with Serilog
@@ -88,6 +97,7 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
+app.UseCors();
 // Add Hangfire Configurations And Protect Hangfire Dashboard
 app.UseHangfireDashboard("/jobs", new DashboardOptions
 {
@@ -117,5 +127,7 @@ app.UseAuthorization();
 app.UseExceptionHandler();
 
 app.MapControllers();
+
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

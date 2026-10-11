@@ -1,4 +1,6 @@
-﻿using ExpenseTracker.Domain.Entities;
+﻿using ExpenseTracker.Application.Contracts.Notifications;
+using ExpenseTracker.Application.Interfaces;
+using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Enums;
 using ExpenseTracker.Infrastructure.Helpers;
 using ExpenseTracker.Infrastructure.Persistence;
@@ -9,9 +11,13 @@ using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Infrastructure.Jobs;
 
-public class BudgetCheckJob(ApplicationDbContext context, ILogger<BudgetCheckJob> logger) : IBudgetCheckJob
+public class BudgetCheckJob(
+    ApplicationDbContext context,
+    INotificationPublisher publisher,
+    ILogger<BudgetCheckJob> logger) : IBudgetCheckJob
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly INotificationPublisher _publisher = publisher;
     private readonly ILogger<BudgetCheckJob> _logger = logger;
 
     private const decimal ApproachingThreshold = 0.8m; // 80%
@@ -101,6 +107,7 @@ public class BudgetCheckJob(ApplicationDbContext context, ILogger<BudgetCheckJob
             toSend.Add((notification, entry.User, categoryName, spent, budget.Amount));
         }
 
+
         if (toSend.Count == 0)
         {
             _logger.LogInformation("No new budget alerts to send.");
@@ -138,6 +145,23 @@ public class BudgetCheckJob(ApplicationDbContext context, ILogger<BudgetCheckJob
                 : "⚠️ ExpenseTracker: Approaching Budget Limit";
 
             BackgroundJob.Enqueue<IEmailSender>(sender => sender.SendEmailAsync(item.User.Email!, subject, emailBody));
+        }
+
+        foreach (var item in toSend)
+        {
+            try
+            {
+                var n = item.Notification;
+
+                var payload = new NotificationResponse(
+                    n.Id, n.BudgetId, item.CategoryName, n.Type, n.Message, n.SentAt, n.IsRead);
+
+                await _publisher.PublishAsync(n.UserId, payload, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to push real-time notification {NotificationId}", item.Notification.Id);
+            }
         }
 
         _logger.LogInformation("Generated {Count} budget alerts and enqueued their emails.", toSend.Count);
